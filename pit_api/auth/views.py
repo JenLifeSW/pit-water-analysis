@@ -116,7 +116,6 @@ class SendVerificationEmail(PublicAPIView):
             expires_at=timezone.now() + timedelta(minutes=5)
         )
 
-        print(f"verification: {verification}")
         send_mail(
             "PIT 메일 인증 번호",
             f"메일 인증용 코드는 {verification.code} 입니다.",
