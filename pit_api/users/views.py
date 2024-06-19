@@ -2,17 +2,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from pit_api.auth.models import Role
 from pit_api.common.views import BaseAPIView
+from pit_api.users.serializers import UserInfoSerializer
 
 
 class UserInfoAPIView(BaseAPIView):
     def get(self, request):
         user = JWTAuthentication().authenticate(request)[0]
-        role = Role.objects.filter(id=user.role.id)
-        user_data = {
-            "nickname": user.nickname
-        }
+        serializer = UserInfoSerializer(user)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         nickname = request.data.get("nickname")

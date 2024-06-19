@@ -14,6 +14,7 @@ from pit_api.auth.serializers import RegistrationSerializer, LoginSerializer, Em
 from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception
 from pit_api.common.views import PublicAPIView
 from pit_api.users.models import User
+from pit_api.users.serializers import UserInfoSerializer
 
 
 class RegistrationAPIView(PublicAPIView):
@@ -34,10 +35,7 @@ class RegistrationAPIView(PublicAPIView):
         except:
             role = Role.objects.get(pk=0)
 
-        user_role_limit = 0
-        # try:
         host_user = JWTAuthentication().authenticate(request)
-        print(f"호스트 유저: {host_user}")
         if host_user is not None:
             user = host_user[0]
             user_role_limit = user.role.id
@@ -45,8 +43,6 @@ class RegistrationAPIView(PublicAPIView):
                 raise UnAuthorized401Exception({"message": "새로운 유저의 권한은 현재 유저의 권한보다 높을 수 없습니다."})
         if host_user is None and role.id != 0:
             raise UnAuthorized401Exception({"message": "새로운 유저의 권한은 현재 유저의 권한보다 높을 수 없습니다."})
-        # except InvalidToken:
-        #     pass
 
         created_at = timezone.now()
         user_data = {
@@ -56,7 +52,7 @@ class RegistrationAPIView(PublicAPIView):
             "role": role.id,
             "created_at": created_at
         }
-        print(f"회원가입: {user_data}")
+
         serializer = RegistrationSerializer(data=user_data)
 
         if not serializer.is_valid():
@@ -78,15 +74,8 @@ class LoginAPIView(PublicAPIView):
 
             token = TokenObtainPairSerializer().get_token(user)
 
-            response_data = {
-                "user": {
-                    "id": user.id,
-                    "nickname": user.nickname,
-                    "email": user.email,
-                    "phone": user.phone,
-                }
-            }
-            response = Response(response_data, status=status.HTTP_204_NO_CONTENT)
+            serializer = UserInfoSerializer(user)
+            response = Response(serializer.data, status=status.HTTP_200_OK)
             response["Authorization"] = f"Bearer {token}/{token.access_token}"
             return response
 
