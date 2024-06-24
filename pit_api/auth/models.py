@@ -11,6 +11,7 @@ class Role(models.Model):
 
     id = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=10, null=False, blank=False)
+    description = models.CharField(max_length=10, null=False, blank=False)
 
 
 def generate_verification_code():

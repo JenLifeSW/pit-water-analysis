@@ -1,0 +1,29 @@
+from django.db import models
+from django.utils import timezone
+
+from pit_api.users.models import User
+
+
+class Hatchery(models.Model):
+    class Meta:
+        db_table = "hatchery"
+
+    name = models.CharField(max_length=30, null=False, blank=False)
+    description = models.CharField(max_length=200, null=True)
+    address = models.CharField(max_length=50, null=True)
+    address_detail = models.CharField(max_length=50, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    removed_at = models.DateTimeField(null=True)
+
+    def delete(self, using=None, keep_parents=False):
+        self.removed_at = timezone.now()
+        self.save(using=using)
+
+
+class HatcheryManagerAssociation(models.Model):
+    class Meta:
+        db_table = "hatchery_manager_association"
+        unique_together = ["user", "hatchery"]
+
+    hatchery = models.ForeignKey(Hatchery, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)

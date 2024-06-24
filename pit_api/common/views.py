@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception, NotFound404Exception
-from pit_api.common.permissions import IsPostAble
+from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception, NotFound404Exception, \
+    Conflict409Exception
+from pit_api.common.permissions import IsAdminRole, IsUserRole, IsManagerRole, IsOperatorRole
 
 
 class PublicAPIView(APIView):
@@ -23,6 +24,8 @@ class PublicAPIView(APIView):
             return self.handle_error_response(error, status.HTTP_401_UNAUTHORIZED)
         except NotFound404Exception as error:
             return self.handle_error_response(error, status.HTTP_404_NOT_FOUND)
+        except Conflict409Exception as error:
+            return self.handle_error_response(error, status.HTTP_409_CONFLICT)
 
     def handle_error_response(self, error, status_code):
         error_body = json.loads(error.message)
@@ -36,6 +39,24 @@ class PublicAPIView(APIView):
 
 
 @authentication_classes([JWTAuthentication])
-@permission_classes([IsPostAble])
-class BaseAPIView(PublicAPIView):
+@permission_classes([IsUserRole])
+class UserAPIView(PublicAPIView):
+    pass
+
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsManagerRole])
+class ManagerAPIView(PublicAPIView):
+    pass
+
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminRole])
+class AdminAPIView(PublicAPIView):
+    pass
+
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsOperatorRole])
+class OperatorAPIView(PublicAPIView):
     pass

@@ -2,11 +2,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from pit_api.common.views import BaseAPIView
+from pit_api.common.views import UserAPIView
 from pit_api.users.serializers import UserInfoSerializer
 
 
-class UserInfoAPIView(BaseAPIView):
+class UserInfoAPIView(UserAPIView):
     def get(self, request):
         user = JWTAuthentication().authenticate(request)[0]
         serializer = UserInfoSerializer(user)

@@ -1,13 +1,27 @@
 from rest_framework.permissions import IsAuthenticated
 
 
-class IsAdminRole(IsAuthenticated):
+class BaseRolePermission(IsAuthenticated):
+    allowed_roles = []
+
     def has_permission(self, request, view):
-        return bool(super().has_permission(request, view) and request.user.role == "admin")
+        is_authenticated = super().has_permission(request, view)
+        if not is_authenticated:
+            return False
+        return request.user.role.name in self.allowed_roles
 
 
-class IsPostAble(IsAuthenticated):
-    def has_permission(self, request, view):
-        if request.method == "GET":
-            return True
-        return super().has_permission(request, view)
+class IsUserRole(BaseRolePermission):
+    allowed_roles = ["user", "manager", "admin", "operator"]
+
+
+class IsManagerRole(BaseRolePermission):
+    allowed_roles = ["manager", "admin", "operator"]
+
+
+class IsAdminRole(BaseRolePermission):
+    allowed_roles = ["admin", "operator"]
+
+
+class IsOperatorRole(BaseRolePermission):
+    allowed_roles = ["operator"]

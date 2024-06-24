@@ -19,3 +19,7 @@ class UnAuthorized401Exception(BaseException):
 
 class NotFound404Exception(BaseException):
     pass
+
+
+class Conflict409Exception(BaseException):
+    pass

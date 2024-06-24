@@ -18,10 +18,12 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc-v1'),
+    # path('/swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('/swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('/redoc', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc-v1'),
 
-    path("auth/", include("pit_api.auth.urls")),
-    path("users/", include("pit_api.users.urls")),
+    path("/auth", include("pit_api.auth.urls")),
+    path("/hatcheries", include("pit_api.hatcheries.urls")),
+    path("/tanks", include("pit_api.tanks.urls")),
+    path("/users", include("pit_api.users.urls")),
 ]
