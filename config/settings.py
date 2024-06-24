@@ -64,7 +64,7 @@ LOGGING = {
 }
 
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(", ")
 
 # Application definition
 
