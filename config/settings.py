@@ -27,7 +27,12 @@ DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY")
 
 current_directory = os.getcwd()
-log_path = os.path.join(current_directory, "django.log")
+# log_path = os.path.join(current_directory, "django.log")
+log_directory = os.path.join(current_directory, "logs")
+
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+log_path = os.path.join(log_directory, "django.log")
 
 LOGGING = {
     'version': 1,
@@ -49,8 +54,10 @@ LOGGING = {
         },
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': log_path,
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 5,
             'formatter': 'verbose'
         },
     },
