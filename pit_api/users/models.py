@@ -28,7 +28,7 @@ class User(AbstractBaseUser):
 
     role = models.ForeignKey(Role, on_delete=models.PROTECT, null=False, db_column="role_id")
     username = models.CharField(max_length=16, unique=True, null=False, blank=False)
-    nickname = models.CharField(max_length=8, default="사용자", null=False, blank=False)
+    nickname = models.CharField(max_length=16, default="사용자", null=False, blank=False)
     email = models.EmailField()
     phone = models.CharField(max_length=16)
     created_at = models.DateTimeField(null=False)

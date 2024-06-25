@@ -14,7 +14,7 @@ class RegistrationSerializer(BaseSerializer):
 
     username = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False)
     password = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False, write_only=True)
-    nickname = serializers.CharField(max_length=8, required=True, allow_null=False, allow_blank=False)
+    nickname = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False)
     role = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all(), required=True, allow_null=False)
     created_at = serializers.DateTimeField(allow_null=False)
 
