@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import timedelta
 
 from django.contrib.auth import authenticate
@@ -11,7 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from pit_api.auth.models import Role, EmailVerification
 from pit_api.auth.serializers import RegistrationSerializer, LoginSerializer, EmailVerificationSerializer
-from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception
+from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception, Conflict409Exception
 from pit_api.common.views import PublicAPIView
 from pit_api.users.models import User
 from pit_api.users.serializers import UserInfoSerializer
@@ -29,6 +31,8 @@ class RegistrationAPIView(PublicAPIView):
 
         if not nickname or nickname is None:
             nickname = "사용자"
+        if User.objects.filter(username=username).exists():
+            raise Conflict409Exception({"message": "이미 사용중인 아이디입니다."})
 
         try:
             role = Role.objects.get(pk=role_id)
