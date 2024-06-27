@@ -31,7 +31,7 @@ class RegistrationAPIView(PublicAPIView):
 
         if not nickname or nickname is None:
             random_str = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
-            nickname = f"사용자-{random_str}"
+            nickname = f"사용자{random_str}"
 
         if User.objects.filter(username=username).exists():
             raise Conflict409Exception({"message": "이미 사용중인 아이디입니다."})

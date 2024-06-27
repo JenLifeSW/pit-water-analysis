@@ -5,6 +5,7 @@ from rest_framework import serializers
 from pit_api.auth.models import Role, EmailVerification
 from pit_api.common.base_serializers import BaseSerializer
 from pit_api.users.models import User
+from pit_api.users.validators import NicknameValidator, UsernameValidator, PasswordValidator
 
 
 class RegistrationSerializer(BaseSerializer):
@@ -12,9 +13,9 @@ class RegistrationSerializer(BaseSerializer):
         model = User
         fields = ["id", "username", "password", "nickname", "role", "created_at"]
 
-    username = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False)
-    password = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False, write_only=True)
-    nickname = serializers.CharField(max_length=16, required=True, allow_null=False, allow_blank=False)
+    username = serializers.CharField(required=True, validators=[UsernameValidator()])
+    password = serializers.CharField(required=True, validators=[PasswordValidator()])
+    nickname = serializers.CharField(required=True, validators=[NicknameValidator()])
     role = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all(), required=True, allow_null=False)
     created_at = serializers.DateTimeField(allow_null=False)
 

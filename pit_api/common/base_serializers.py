@@ -9,7 +9,8 @@ def get_error_message(errors):
         error_object = errors
 
     field, error = next(iter(error_object.items()))
-    return {field: error[0], "code": error[0].code}
+    # return {field: error[0], "code": error[0].code}
+    return error[0]
 
 
 class BaseSerializer(serializers.ModelSerializer):

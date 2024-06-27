@@ -6,6 +6,7 @@ from pit_api.fish_species.models import FishSpecies
 from pit_api.measurements.models import MeasurementData
 from pit_api.measurements.serializers import MeasurementDataSerializer
 from pit_api.tanks.models import Tank
+from pit_api.tanks.validators import TankNameValidator, TankDescriptionValidator
 
 
 class TankSerializer(BaseSerializer):
@@ -13,7 +14,8 @@ class TankSerializer(BaseSerializer):
         model = Tank
         fields = ["id", "name", "fishSpeciesId", "description"]
 
-    name = serializers.CharField(required=True)
+    name = serializers.CharField(required=True, validators=[TankNameValidator()])
+    description = serializers.CharField(required=False, validators=[TankDescriptionValidator()])
     fishSpeciesId = serializers.PrimaryKeyRelatedField(queryset=FishSpecies.objects.all(), source="fish_species")
 
 
