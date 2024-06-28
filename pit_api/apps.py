@@ -4,11 +4,15 @@ from django.db.models.signals import post_migrate
 
 def create_initial_roles(sender, **kwargs):
     from pit_api.auth.models import Role
+    from pit_api.fish_species.models import FishSpecies
     if not Role.objects.exists():
         Role.objects.create(name="user", description="사용자", id=0)
         Role.objects.create(name="manager", description="매니저", id=10)
         Role.objects.create(name="admin", description="어드민", id=20)
         Role.objects.create(name="operator", description="운영자", id=30)
+
+    if not FishSpecies.objects.exists():
+        FishSpecies.objects.create(name="기타")
 
 
 class PitApiConfig(AppConfig):
