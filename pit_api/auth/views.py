@@ -32,9 +32,15 @@ class RegistrationAPIView(PublicAPIView):
         if not nickname or nickname is None:
             random_str = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
             nickname = f"사용자{random_str}"
+            while User.objects.filter(nickname=nickname).exists():
+                random_str = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
+                nickname = f"사용자{random_str}"
 
         if User.objects.filter(username=username).exists():
             raise Conflict409Exception({"message": "이미 사용중인 아이디입니다."})
+
+        if User.objects.filter(nickname=nickname).exists():
+            raise Conflict409Exception({"message": "이미 사용중인 닉네임입니다."})
 
         try:
             role = Role.objects.get(pk=role_id)
@@ -76,23 +82,23 @@ class LoginAPIView(PublicAPIView):
 
             user = authenticate(username=username, password=password)
             if not user:
-                raise BadRequest400Exception({"message": "아이디 또는 비밀번호를 확인하세요."})
+                raise UnAuthorized401Exception({"message": "아이디 또는 비밀번호를 확인하세요."})
 
             token = TokenObtainPairSerializer().get_token(user)
 
             serializer = UserInfoSerializer(user)
-            response = Response(serializer.data, status=status.HTTP_200_OK)
+            response = Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             response["Authorization"] = f"Bearer {token}/{token.access_token}"
             return response
 
-        raise BadRequest400Exception({"message": "아이디 또는 비밀번호를 입력하세요."})
+        raise UnAuthorized401Exception({"message": "아이디 또는 비밀번호를 입력하세요."})
 
 
 class RefreshTokenAPIView(PublicAPIView):
     def post(self, request):
         refresh_token = request.headers.get("Authorization").split(" ")[1]
         if not refresh_token:
-            raise BadRequest400Exception({"message": "잘못된 요청입니다."})
+            raise UnAuthorized401Exception({"message": "잘못된 요청입니다."})
 
         try:
             token = RefreshToken(refresh_token)
@@ -100,7 +106,7 @@ class RefreshTokenAPIView(PublicAPIView):
             response["Authorization"] = f"Bearer {token.access_token}"
             return response
         except Exception as e:
-            raise BadRequest400Exception({"message": f"토큰 갱신 실패: {str(e)}"})
+            raise UnAuthorized401Exception({"message": f"토큰 갱신 실패: {str(e)}"})
 
 
 class SendVerificationEmail(PublicAPIView):
