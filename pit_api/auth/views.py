@@ -90,7 +90,7 @@ class LoginAPIView(PublicAPIView):
             token = TokenObtainPairSerializer().get_token(user)
 
             serializer = UserInfoSerializer(user)
-            response = Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            response = Response(serializer.data, status=status.HTTP_200_OK)
             response["Authorization"] = f"Bearer {token}/{token.access_token}"
             return response
 
