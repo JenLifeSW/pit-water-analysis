@@ -22,6 +22,7 @@ from pit_api.users.serializers import UserInfoSerializer
 
 
 class RegistrationAPIView(PublicAPIView):
+    @swagger_auto_schema(auto_schema=None)
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
