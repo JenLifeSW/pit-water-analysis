@@ -34,6 +34,7 @@ schema_hatchery_list = openapi.Schema(
             )
         ),
     },
+    description="양식장 리스트",
 )
 
 schema_hatchery_detail = openapi.Schema(
@@ -47,6 +48,7 @@ schema_hatchery_detail = openapi.Schema(
             ),
         ),
     },
+    description="양식장 상세 정보",
 )
 
 parameters_hatchery = parameters_authorization[:] + [

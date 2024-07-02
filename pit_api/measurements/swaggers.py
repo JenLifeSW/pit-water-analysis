@@ -22,20 +22,27 @@ properties_grades = {
 schema_measured_data_detail = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
-        "target": openapi.Schema(type=openapi.TYPE_OBJECT, description="측정 타겟"),
+        "target": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=properties_measurement_target,
+            description="측정 타겟"
+        ),
         "measurementDatas": openapi.Schema(
             type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties=properties_measured_data,
+                description="측정 데이터"
             )
         ),
         "grades": openapi.Schema(
             type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties=properties_grades,
+                description="등급 리스트"
             )
         ),
-    }
+    },
+    description="측정 데이터 조회 응답",
 )
 
 parameters_measured_data_detail = parameters_authorization[:] + [
@@ -77,10 +84,10 @@ parameters_measured_data_detail = parameters_authorization[:] + [
 ]
 
 schema_get_measured_data_detail_dict = {
-    "operation_summary": "측정 항목 히스토리 조회",
+    "operation_summary": "측정 데이터 조회",
     "responses": {
         200: openapi.Response(
-            description="양식장 리스트 조회 성공",
+            description="측정 데이터 조회 성공",
             schema=schema_measured_data_detail,
         ),
         401: responses_common[401],

@@ -44,7 +44,7 @@ properties_tank_detail = {
             type=openapi.TYPE_OBJECT,
             properties=properties_measurement_data,
         ),
-        description="측정 데이터",
+        description="타겟별 최근 측정 데이터 리스트",
     )
 }
 properties_tank_detail.pop("lastMeasuredAt")
@@ -59,6 +59,7 @@ schema_tank_list = openapi.Schema(
             )
         ),
     },
+    description="수조 리스트",
 )
 
 schema_tank_detail = openapi.Schema(
@@ -69,6 +70,7 @@ schema_tank_detail = openapi.Schema(
             properties=properties_tank_detail,
         ),
     },
+    description="수조 상세 정보",
 )
 
 parameters_hatchery = parameters_authorization[:] + [
