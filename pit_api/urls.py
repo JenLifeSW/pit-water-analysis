@@ -3,6 +3,8 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
+from config import settings
+
 schema_view = get_schema_view(
     openapi.Info(
         title="PIT",
@@ -12,6 +14,7 @@ schema_view = get_schema_view(
         # contact=openapi.Contact(email="이메일"),  # 부가정보
         # license=openapi.License(name="mit"),  # 부가정보
     ),
+    url=settings.SWAGGER_URL if not settings.DEBUG else None,
     public=True,
     permission_classes=[permissions.AllowAny],
 )
