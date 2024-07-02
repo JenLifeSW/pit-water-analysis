@@ -1,4 +1,5 @@
 from django.db import transaction
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -8,9 +9,12 @@ from pit_api.common.permissions import IsAdminRole
 from pit_api.common.views import AdminAPIView, ManagerAPIView
 from pit_api.hatcheries.models import Hatchery, HatcheryManagerAssociation
 from pit_api.hatcheries.serializers import HatcherySerializer, HatcheryDetailSerializer
+from pit_api.hatcheries.swaggers import schema_get_hatchery_list_dict, schema_add_hatchery_dict, \
+    schema_get_hatchery_info_dict, schema_update_hatchery_info_dict, schema_delete_hatchery_info_dict
 
 
 class HatcheryAPIView(AdminAPIView):
+    @swagger_auto_schema(**schema_add_hatchery_dict)
     @transaction.atomic
     def post(self, request):
         user = request.user
@@ -35,6 +39,7 @@ class HatcheryAPIView(AdminAPIView):
 
         return Response({"hatcheries": hatcheries_serializer.data}, status=status.HTTP_201_CREATED)
 
+    @swagger_auto_schema(**schema_get_hatchery_list_dict)
     def get(self, request):
         user = request.user
         hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user)
@@ -62,6 +67,7 @@ class HatcheryInfoAPIView(ManagerAPIView):
             raise BadRequest400Exception({"message": "삭제된 양식장입니다."})
         return hatchery
 
+    @swagger_auto_schema(**schema_update_hatchery_info_dict)
     @transaction.atomic
     def patch(self, request, hatchery_id):
         user = request.user
@@ -82,6 +88,7 @@ class HatcheryInfoAPIView(ManagerAPIView):
         detail_serializer = HatcheryDetailSerializer(hatchery)
         return Response({"hatchery": detail_serializer.data}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(**schema_get_hatchery_info_dict)
     def get(self, request, hatchery_id):
         user = request.user
         hatchery = self.get_hatchery(hatchery_id, user)
@@ -90,6 +97,7 @@ class HatcheryInfoAPIView(ManagerAPIView):
 
         return Response({"hatchery": serializer.data}, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(**schema_delete_hatchery_info_dict)
     def delete(self, request, hatchery_id):
         user = request.user
         hatchery = self.get_hatchery(hatchery_id, user)

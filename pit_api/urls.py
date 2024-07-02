@@ -1,8 +1,7 @@
 from django.urls import path, include
-
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -25,5 +24,5 @@ urlpatterns = [
     path("/auth", include("pit_api.auth.urls")),
     path("/hatcheries", include("pit_api.hatcheries.urls")),
     path("/tanks", include("pit_api.tanks.urls")),
-    path("/users", include("pit_api.users.urls")),
+    # path("/users", include("pit_api.users.urls")),
 ]

@@ -14,7 +14,7 @@ class TankSerializer(BaseSerializer):
         model = Tank
         fields = ["id", "name", "fishSpeciesId", "description"]
 
-    name = serializers.CharField(required=True, validators=[TankNameValidator()])
+    name = serializers.CharField(required=True, min_length=2, validators=[TankNameValidator()])
     description = serializers.CharField(required=False, validators=[TankDescriptionValidator()])
     fishSpeciesId = serializers.PrimaryKeyRelatedField(queryset=FishSpecies.objects.all(), source="fish_species")
 

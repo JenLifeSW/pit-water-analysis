@@ -5,6 +5,7 @@ from datetime import timedelta
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -13,6 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from pit_api.auth.models import Role, EmailVerification
 from pit_api.auth.serializers import RegistrationSerializer, LoginSerializer, EmailVerificationSerializer
+from pit_api.auth.swaggers import schema_login_dict, schema_refresh_dict
 from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception, Conflict409Exception
 from pit_api.common.views import PublicAPIView
 from pit_api.users.models import User
@@ -74,6 +76,7 @@ class RegistrationAPIView(PublicAPIView):
 
 
 class LoginAPIView(PublicAPIView):
+    @swagger_auto_schema(**schema_login_dict)
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -95,8 +98,12 @@ class LoginAPIView(PublicAPIView):
 
 
 class RefreshTokenAPIView(PublicAPIView):
+    @swagger_auto_schema(**schema_refresh_dict)
     def post(self, request):
-        refresh_token = request.headers.get("Authorization").split(" ")[1]
+        try:
+            refresh_token = request.headers.get("Authorization").split(" ")[1]
+        except:
+            raise UnAuthorized401Exception({"message": "잘못된 요청입니다."})
         if not refresh_token:
             raise UnAuthorized401Exception({"message": "잘못된 요청입니다."})
 

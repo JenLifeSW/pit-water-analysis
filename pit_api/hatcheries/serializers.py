@@ -11,7 +11,7 @@ class HatcherySerializer(BaseSerializer):
         model = Hatchery
         fields = ["id", "name", "description", "address", "addressDetail"]
 
-    name = serializers.CharField(required=True, validators=[HatcheryNameValidator()])
+    name = serializers.CharField(required=True, min_length=2, validators=[HatcheryNameValidator()])
     description = serializers.CharField(required=False, validators=[HatcheryDescriptionValidator()])
     address = serializers.CharField(required=False, validators=[HatcheryAddressValidator()])
     addressDetail = serializers.CharField(source='address_detail', required=False,

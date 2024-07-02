@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -11,6 +12,7 @@ from pit_api.grades.serializers import GradeSerializer
 from pit_api.measurements.models import MeasurementTarget, MeasurementData
 from pit_api.measurements.serializers import MeasurementTargetSerializer, MeasurementTargetDisplaySerializer, \
     MeasurementHistorySerializer
+from pit_api.measurements.swaggers import schema_get_measured_data_detail_dict
 from pit_api.tanks.models import Tank
 
 
@@ -22,6 +24,7 @@ class MeasurementTargetListAPIView(ManagerAPIView):
 
 
 class MeasurementHistoryAPIView(ManagerAPIView):
+    @swagger_auto_schema(**schema_get_measured_data_detail_dict)
     def get(self, request, tank_id):
         target_id = request.query_params.get("target-id")
         weeks = request.query_params.get("weeks")
