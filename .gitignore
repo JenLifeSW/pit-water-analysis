@@ -380,3 +380,5 @@ pyrightconfig.json
 /pit_api/migrations/
 /.idea/
 /logs/
+/static/
+
