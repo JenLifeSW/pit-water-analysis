@@ -4,5 +4,5 @@ from pit_api.fish_species.models import FishSpecies
 
 class FishSpeciesSerializer(BaseSerializer):
     class Meta:
-        models = FishSpecies
+        model = FishSpecies
         fields = ["id", "name"]

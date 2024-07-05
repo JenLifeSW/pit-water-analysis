@@ -2,6 +2,7 @@ from django.db.models import Max
 from rest_framework import serializers
 
 from pit_api.common.base_serializers import BaseSerializer
+from pit_api.common.regex_string import regex_str_hatchery_name, regex_str_hatchery_description
 from pit_api.fish_species.models import FishSpecies
 from pit_api.measurements.models import MeasurementData
 from pit_api.measurements.serializers import MeasurementDataSerializer
@@ -14,8 +15,17 @@ class TankSerializer(BaseSerializer):
         model = Tank
         fields = ["id", "name", "fishSpeciesId", "description"]
 
-    name = serializers.CharField(required=True, min_length=2, validators=[TankNameValidator()])
-    description = serializers.CharField(required=False, validators=[TankDescriptionValidator()])
+    name = serializers.CharField(
+        required=True,
+        min_length=2,
+        validators=[TankNameValidator()],
+        help_text=regex_str_hatchery_name
+    )
+    description = serializers.CharField(
+        required=False,
+        validators=[TankDescriptionValidator()],
+        help_text=regex_str_hatchery_description
+    )
     fishSpeciesId = serializers.PrimaryKeyRelatedField(queryset=FishSpecies.objects.all(), source="fish_species")
 
 
