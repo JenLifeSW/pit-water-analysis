@@ -95,6 +95,7 @@ parameters_tank = parameters_authorization[:] + [
 
 schema_add_tank_dict = {
     "operation_summary": "수조 추가",
+    "request_body": TankSerializer,
     "responses": {
         201: openapi.Response(
             description="수조 추가 성공",
