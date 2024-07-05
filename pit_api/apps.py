@@ -2,7 +2,7 @@ from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 
 
-def create_initial_roles(sender, **kwargs):
+def create_initial_datas(sender, **kwargs):
     from pit_api.auth.models import Role
     from pit_api.fish_species.models import FishSpecies
     from pit_api.measurements.models import MeasurementTarget
@@ -15,6 +15,8 @@ def create_initial_roles(sender, **kwargs):
 
     if not FishSpecies.objects.exists():
         FishSpecies.objects.create(name="기타")
+        FishSpecies.objects.create(name="광어")
+        FishSpecies.objects.create(name="우럭")
 
     if not MeasurementTarget.objects.exists():
         MeasurementTarget.objects.create(name="질산성 질소", display_unit="ppm", display_multiplier="0.001")
@@ -25,4 +27,4 @@ class PitApiConfig(AppConfig):
     name = 'pit_api'
 
     def ready(self):
-        post_migrate.connect(create_initial_roles, sender=self)
+        post_migrate.connect(create_initial_datas, sender=self)
