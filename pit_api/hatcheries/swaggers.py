@@ -10,6 +10,7 @@ properties_hatchery = {
     "description": openapi.Schema(type=openapi.TYPE_STRING, description="양식장 설명"),
     "address": openapi.Schema(type=openapi.TYPE_STRING, description="주소"),
     "addressDetail": openapi.Schema(type=openapi.TYPE_STRING, description="상세 주소"),
+    "image": openapi.Schema(type=openapi.TYPE_STRING, description="썸네일 URL")
 }
 
 properties_hatchery_detail = {
