@@ -5,13 +5,14 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from pit_api.authentication import CustomJWTAuthentication
 from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exception, NotFound404Exception, \
     Conflict409Exception
 from pit_api.common.permissions import IsAdminRole, IsUserRole, IsManagerRole, IsOperatorRole
 
 
+@authentication_classes([CustomJWTAuthentication])
 class PublicAPIView(APIView):
     renderer_classes = [JSONRenderer]
 
@@ -38,25 +39,21 @@ class PublicAPIView(APIView):
         return response
 
 
-@authentication_classes([JWTAuthentication])
 @permission_classes([IsUserRole])
 class UserAPIView(PublicAPIView):
     pass
 
 
-@authentication_classes([JWTAuthentication])
 @permission_classes([IsManagerRole])
 class ManagerAPIView(PublicAPIView):
     pass
 
 
-@authentication_classes([JWTAuthentication])
 @permission_classes([IsAdminRole])
 class AdminAPIView(PublicAPIView):
     pass
 
 
-@authentication_classes([JWTAuthentication])
 @permission_classes([IsOperatorRole])
 class OperatorAPIView(PublicAPIView):
     pass
