@@ -12,7 +12,6 @@ from pit_api.common.exceptions import BadRequest400Exception, UnAuthorized401Exc
 from pit_api.common.permissions import IsAdminRole, IsUserRole, IsManagerRole, IsOperatorRole
 
 
-@authentication_classes([CustomJWTAuthentication])
 class PublicAPIView(APIView):
     renderer_classes = [JSONRenderer]
 
@@ -39,21 +38,25 @@ class PublicAPIView(APIView):
         return response
 
 
+@authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsUserRole])
 class UserAPIView(PublicAPIView):
     pass
 
 
+@authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsManagerRole])
 class ManagerAPIView(PublicAPIView):
     pass
 
 
+@authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAdminRole])
 class AdminAPIView(PublicAPIView):
     pass
 
 
+@authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsOperatorRole])
 class OperatorAPIView(PublicAPIView):
     pass
