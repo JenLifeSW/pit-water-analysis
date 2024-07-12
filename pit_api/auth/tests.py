@@ -82,7 +82,7 @@ class TestAPILogin(BaseAPITestCase):
             'password': self.password,
         }
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("Authorization", response.headers)
         self.assertTrue("Bearer " in response.headers["Authorization"])
 

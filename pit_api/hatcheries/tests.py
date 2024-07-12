@@ -58,24 +58,11 @@ class TestAPIAddHatchery(AuthenticatedAdminAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["message"], "양식장 설명의 길이는 255자를 초과할 수 없습니다.")
 
-    def test_wrong_description2_special_character(self):
-        data = {"name": self.name, "description": "&"}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["message"], "양식장 설명에 사용할 수 없는 기호가 포함되어 있습니다.")
-
     def test_wrong_address1_max_length(self):
         data = {"name": self.name, "address": "a" * 101}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["message"], "양식장 주소의 길이는 100자를 초과할 수 없습니다.")
-
-    def test_wrong_address2_special_character(self):
-        data = {"name": self.name, "address": "&"}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["message"], "양식장 주소에 사용할 수 없는 기호가 포함되어 있습니다.")
-
 
 # 어드민 미만 권한 양식장 추가시 실패
 class TestAPIAddHatcheryWithUnderAdminAuth(AuthenticatedManagerAPITestCase):

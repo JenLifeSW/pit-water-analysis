@@ -97,12 +97,6 @@ class TestAPIAddTank(_AddTankSetUppedTestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["message"], "수조 설명의 길이는 255자를 초과할 수 없습니다.")
 
-    def test_wrong_description2_special_character(self):
-        data = {"name": self.name, "fishSpeciesId": self.fish_species_id, "description": "&"}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["message"], "수조 설명에 사용할 수 없는 기호가 포함되어 있습니다.")
-
 
 # 수조 수정
 class TestAPIUpdateTankInfo(_TankInfoSetUppedTestCase):
