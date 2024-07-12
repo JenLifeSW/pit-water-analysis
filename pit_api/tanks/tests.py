@@ -3,7 +3,7 @@ import re
 from rest_framework import status
 
 from pit_api.hatcheries.tests import _HatcheryInfoSetUppedTestCaseWithManagerAuth
-from pit_api.measurements.models import MeasurementTarget, MeasurementData
+from pit_api.measurements.models import MeasurementTarget, MeasurementData, TankTargetAssociation
 
 
 # 수조 테스트 케이스 셋업
@@ -14,9 +14,11 @@ class _AddTankSetUppedTestCase(_HatcheryInfoSetUppedTestCaseWithManagerAuth):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.target = MeasurementTarget.objects.create(name="질산성 질소", display_unit="ppm")
+        tank_target_association = TankTargetAssociation.objects.create(tank=cls.tank, target=cls.target)
         cls.measurement_data = MeasurementData.objects.create(
-            tank=cls.tank,
-            target=cls.target,
+            # tank=cls.tank,
+            # target=cls.target,
+            tank_target=tank_target_association,
             value=10,
             index=0
         )

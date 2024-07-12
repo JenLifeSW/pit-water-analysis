@@ -34,7 +34,14 @@ properties_tank = {
         ),
         description="어종",
     ),
-    "lastMeasuredAt": openapi.Schema(type=openapi.TYPE_STRING, description="마지막 측정 시간"),
+    # "lastMeasuredAt": openapi.Schema(type=openapi.TYPE_STRING, description="마지막 측정 시간"),
+    "measurementDatas": openapi.Schema(
+        type=openapi.TYPE_ARRAY, items=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties=properties_measurement_data
+        ),
+        description="측정 데이터 리스트",
+    ),
 }
 
 properties_tank_detail = {
@@ -47,7 +54,6 @@ properties_tank_detail = {
         description="타겟별 최근 측정 데이터 리스트",
     )
 }
-properties_tank_detail.pop("lastMeasuredAt")
 
 schema_tank_list = openapi.Schema(
     type=openapi.TYPE_OBJECT,

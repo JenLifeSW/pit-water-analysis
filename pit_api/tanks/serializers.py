@@ -1,11 +1,10 @@
-from django.db.models import Max
 from rest_framework import serializers
 
 from pit_api.common.base_serializers import BaseSerializer
 from pit_api.common.regex_string import regex_str_hatchery_name, regex_str_hatchery_description
 from pit_api.fish_species.models import FishSpecies
-from pit_api.measurements.models import MeasurementData
-from pit_api.measurements.serializers import MeasurementDataSerializer
+from pit_api.measurements.models import MeasurementData, TankTargetAssociation
+from pit_api.measurements.serializers import MeasurementDataSerializer, MeasurementTargetSerializer
 from pit_api.tanks.models import Tank
 from pit_api.tanks.validators import TankNameValidator, TankDescriptionValidator
 
@@ -32,9 +31,10 @@ class TankSerializer(BaseSerializer):
 class TankInfoSerializer(BaseSerializer):
     class Meta:
         model = Tank
-        fields = ["id", "name", "description", "fishSpecies", "lastMeasuredAt"]
+        fields = ["id", "name", "description", "fishSpecies", "measurementTargets", "lastMeasuredAt"]
 
     fishSpecies = serializers.SerializerMethodField()
+    measurementTargets = serializers.SerializerMethodField()
     lastMeasuredAt = serializers.SerializerMethodField()
 
     def get_fishSpecies(self, obj):
@@ -44,8 +44,14 @@ class TankInfoSerializer(BaseSerializer):
             "name": fish_species.name
         }
 
+    def get_measurementTargets(self, obj):
+        targets = TankTargetAssociation.objects.filter(tank=obj).select_related('target')
+        return MeasurementTargetSerializer([association.target for association in targets], many=True).data
+
     def get_lastMeasuredAt(self, obj):
-        latest_measurement = MeasurementData.objects.filter(tank=obj).order_by('-measured_at').first()
+        tank_target_associations = TankTargetAssociation.objects.filter(tank=obj)
+        latest_measurement = MeasurementData.objects.filter(tank_target__in=tank_target_associations).order_by(
+            '-measured_at').first()
         return latest_measurement.measured_at if latest_measurement else None
 
 
@@ -65,13 +71,20 @@ class TankDetailSerializer(BaseSerializer):
         }
 
     def get_measurementDatas(self, obj):
-        latest_measurements = MeasurementData.objects.filter(tank=obj).values('target').annotate(
-            latest_measured_at=Max('measured_at')
-        )
+        tank_targets = TankTargetAssociation.objects.filter(tank=obj).select_related('target')
 
-        latest_measurement_data = MeasurementData.objects.filter(
-            tank=obj,
-            measured_at__in=[measurement['latest_measured_at'] for measurement in latest_measurements]
-        )
+        measurement_datas = []
+        for tank_target in tank_targets:
+            latest_measurement = MeasurementData.objects.filter(tank_target=tank_target).order_by(
+                '-measured_at').first()
 
-        return MeasurementDataSerializer(latest_measurement_data, many=True).data
+            if latest_measurement:
+                measurement_datas.append(latest_measurement)
+            else:
+                measurement_datas.append(MeasurementData(
+                    tank_target=tank_target,
+                    value=None,
+                    measured_at=None
+                ))
+
+        return MeasurementDataSerializer(measurement_datas, many=True).data

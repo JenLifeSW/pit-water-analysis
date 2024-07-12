@@ -12,13 +12,19 @@ class MeasurementTarget(models.Model):
     display_multiplier = models.FloatField(default=1.0)
 
 
+class TankTargetAssociation(models.Model):
+    class Meta:
+        db_table = "tank_target_association"
+
+    tank = models.ForeignKey(Tank, on_delete=models.PROTECT)
+    target = models.ForeignKey(MeasurementTarget, on_delete=models.PROTECT)
+
+
 class MeasurementData(models.Model):
     class Meta:
         db_table = "measurement_data"
 
-    tank = models.ForeignKey(Tank, on_delete=models.PROTECT)
-    target = models.ForeignKey(MeasurementTarget, on_delete=models.PROTECT)
+    tank_target = models.ForeignKey(TankTargetAssociation, on_delete=models.PROTECT)
     value = models.PositiveIntegerField(null=False)
     measured_at = models.DateTimeField(auto_now_add=True)
     index = models.PositiveIntegerField(null=False)
-

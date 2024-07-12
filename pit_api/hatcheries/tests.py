@@ -4,6 +4,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from pit_api.fish_species.models import FishSpecies
 from pit_api.hatcheries.models import Hatchery, HatcheryManagerAssociation
+from pit_api.measurements.models import TankTargetAssociation, MeasurementTarget
 from pit_api.tanks.models import Tank
 from pit_api.tests import AuthenticatedAdminAPITestCase, AuthenticatedManagerAPITestCase
 from pit_api.users.models import User
@@ -64,6 +65,7 @@ class TestAPIAddHatchery(AuthenticatedAdminAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["message"], "양식장 주소의 길이는 100자를 초과할 수 없습니다.")
 
+
 # 어드민 미만 권한 양식장 추가시 실패
 class TestAPIAddHatcheryWithUnderAdminAuth(AuthenticatedManagerAPITestCase):
     name = "테스트 양식장 1a"
@@ -109,6 +111,9 @@ class _HatcheryInfoSetUppedTestCase(AuthenticatedAdminAPITestCase):
         cls.fish_species_id = 1
         cls.fish_species = FishSpecies.objects.get(id=cls.fish_species_id)
         cls.tank = Tank.objects.create(name=cls.tank_name, hatchery=cls.hatchery, fish_species=cls.fish_species)
+
+        target = MeasurementTarget.objects.create(name="질산성질소", display_unit="ppm", display_multiplier=1.0)
+        TankTargetAssociation.objects.create(tank=cls.tank, target=target)
 
     def set_forbidden_user(self):
         self.other_user = User.objects.create(
@@ -157,6 +162,7 @@ class TestAPIGetHatcheryInfo(_HatcheryInfoSetUppedTestCaseWithManagerAuth):
         self.assertIn("hatchery", response.data)
         self.assertIn("tanks", response.data["hatchery"])
         self.assertIn("fishSpecies", response.data["hatchery"]["tanks"][0])
+        self.assertIn("measurementDatas", response.data["hatchery"]["tanks"][0])
 
     def test_try_forbidden_user(self):
         self.set_forbidden_user()

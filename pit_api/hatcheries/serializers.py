@@ -4,7 +4,7 @@ from pit_api.common.base_serializers import BaseSerializer
 from pit_api.common.regex_string import regex_str_hatchery_name, regex_str_hatchery_description
 from pit_api.hatcheries.models import Hatchery
 from pit_api.hatcheries.validators import HatcheryNameValidator, HatcheryDescriptionValidator, HatcheryAddressValidator
-from pit_api.tanks.serializers import TankInfoSerializer
+from pit_api.tanks.serializers import TankDetailSerializer
 
 
 class HatcherySerializer(BaseSerializer):
@@ -48,7 +48,7 @@ class HatcheryDetailSerializer(BaseSerializer):
         fields = ["id", "name", "description", "address", "addressDetail", "tanks", "image"]
 
     addressDetail = serializers.CharField(source='address_detail', required=False)
-    tanks = TankInfoSerializer(many=True)
+    tanks = TankDetailSerializer(many=True)
     image = serializers.SerializerMethodField()
 
     def get_image(self, obj):

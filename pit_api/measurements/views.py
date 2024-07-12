@@ -9,7 +9,7 @@ from pit_api.common.exceptions import BadRequest400Exception, NotFound404Excepti
 from pit_api.common.views import ManagerAPIView
 from pit_api.grades.models import GradeStandard
 from pit_api.grades.serializers import GradeSerializer
-from pit_api.measurements.models import MeasurementTarget, MeasurementData
+from pit_api.measurements.models import MeasurementTarget, MeasurementData, TankTargetAssociation
 from pit_api.measurements.serializers import MeasurementTargetSerializer, MeasurementTargetDisplaySerializer, \
     MeasurementHistorySerializer
 from pit_api.measurements.swaggers import schema_get_measured_data_detail_dict
@@ -61,9 +61,9 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             end_date = timezone.now()
             start_date = end_date - timezone.timedelta(weeks=int(weeks))
 
+        tank_target_associations = TankTargetAssociation.objects.filter(tank=tank, target=target)
         measurement_datas = MeasurementData.objects.filter(
-            tank=tank,
-            target=target,
+            tank_target__in=tank_target_associations,
             measured_at__range=(start_date, end_date)
         ).order_by("-measured_at")
 
