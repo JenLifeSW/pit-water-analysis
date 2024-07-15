@@ -14,7 +14,7 @@ class MeasurementTargetSerializer(BaseSerializer):
 class MeasurementTargetDisplaySerializer(BaseSerializer):
     class Meta:
         model = MeasurementTarget
-        fields = ["name", "unit"]
+        fields = ["id", "name", "unit"]
 
     unit = serializers.CharField(source="display_unit")
 
