@@ -24,9 +24,9 @@ def create_initial_datas(sender, **kwargs):
         MeasurementTarget.objects.create(name="온도", display_unit="˚C", display_multiplier=1)
 
     if not Grade.objects.exists():
-        Grade.objects.create(name="안전", color="#00FF00")
-        Grade.objects.create(name="경고", color="#FFA500")
-        Grade.objects.create(name="위험", color="#FF0000")
+        Grade.objects.create(name="안전", text_color="#00D2D2", background_color="#D7F6F6")
+        Grade.objects.create(name="경고", text_color="#FF6D00", background_color="#FFE5D2")
+        Grade.objects.create(name="위험", text_color="#FA5A5A", background_color="#FFEAEA")
 
 
 class PitApiConfig(AppConfig):

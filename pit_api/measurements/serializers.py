@@ -22,13 +22,14 @@ class MeasurementTargetDisplaySerializer(BaseSerializer):
 class MeasurementDataSerializer(BaseSerializer):
     class Meta:
         model = MeasurementData
-        fields = ["target", "lastMeasuredAt", "value", "grade", "color"]
+        fields = ["target", "lastMeasuredAt", "value", "grade", "textColor", "backgroundColor"]
 
     target = MeasurementTargetDisplaySerializer(source="tank_target.target")
     lastMeasuredAt = serializers.DateTimeField(source="measured_at", format="%Y-%m-%dT%H:%M:%S", required=False)
     value = serializers.SerializerMethodField()
     grade = serializers.SerializerMethodField()
-    color = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
+    backgroundColor = serializers.SerializerMethodField()
 
     def get_value(self, obj):
         if obj.value is not None:
@@ -52,9 +53,13 @@ class MeasurementDataSerializer(BaseSerializer):
         grade_standard = self._get_grade_standard(obj)
         return grade_standard.grade.name if grade_standard else None
 
-    def get_color(self, obj):
+    def get_textColor(self, obj):
         grade_standard = self._get_grade_standard(obj)
-        return grade_standard.grade.color if grade_standard else None
+        return grade_standard.grade.text_color if grade_standard else None
+
+    def get_backgroundColor(self, obj):
+        grade_standard = self._get_grade_standard(obj)
+        return grade_standard.grade.background_color if grade_standard else None
 
 
 class MeasurementHistorySerializer(BaseSerializer):
