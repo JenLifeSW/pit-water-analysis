@@ -42,7 +42,7 @@ class HatcheryAPIView(AdminAPIView):
     @swagger_auto_schema(**schema_get_hatchery_list_dict)
     def get(self, request):
         user = request.user
-        hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user)
+        hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user, removed_at__isnull=True)
         serializer = HatcherySerializer(hatcheries, many=True)
 
         return Response({"hatcheries": serializer.data}, status=status.HTTP_200_OK)
