@@ -9,7 +9,7 @@ class Grade(models.Model):
 
     name = models.CharField(max_length=16, null=False)
     text_color = models.CharField(max_length=7, null=False, default="#FF0000")
-    background_color = models.CharField(max_length=7, null=False, default="000000")
+    background_color = models.CharField(max_length=7, null=False, default="#000000")
 
 
 class GradeStandard(models.Model):
