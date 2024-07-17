@@ -78,16 +78,13 @@ class MeasurementHistorySerializer(BaseSerializer):
 
 
 class LastMeasuredDataSerializer(serializers.Serializer):
-    lastMeasuredAt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
-    lastMeasuredValue = serializers.FloatField()
-
     def to_representation(self, instance):
         last_measured_data = instance.get("last_measured_data")
         target = instance.get("target")
 
         if last_measured_data:
             last_measured_value = round(last_measured_data.value * target.display_multiplier, 4)
-            last_measured_at = last_measured_data.measured_at
+            last_measured_at = last_measured_data.measured_at.strftime("%Y-%m-%dT%H:%M:%S")
         else:
             last_measured_value = None
             last_measured_at = None
