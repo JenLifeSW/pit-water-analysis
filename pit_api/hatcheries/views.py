@@ -60,7 +60,7 @@ class HatcheryInfoAPIView(ManagerAPIView):
         except:
             raise NotFound404Exception({"message": "양식장 정보를 찾을 수 없습니다."})
 
-        if not HatcheryManagerAssociation.objects.filter(hatchery=hatchery, user=user).exists():
+        if user.role.id != 30 and not HatcheryManagerAssociation.objects.filter(hatchery=hatchery, user=user).exists():
             raise PermissionDenied({"message": "이 양식장에 접근할 권한이 없습니다."})
 
         if hatchery.removed_at:

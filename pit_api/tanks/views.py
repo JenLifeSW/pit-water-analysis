@@ -56,7 +56,7 @@ class TankInfoAPIView(ManagerAPIView):
             raise NotFound404Exception({"message": "수조 정보를 찾을 수 없습니다."})
 
         hatchery = tank.hatchery
-        if not HatcheryManagerAssociation.objects.filter(hatchery=hatchery, user=user).exists():
+        if user.role.id != 30 and not HatcheryManagerAssociation.objects.filter(hatchery=hatchery, user=user).exists():
             raise PermissionDenied({"message": "이 수조에 접근할 권한이 없습니다."})
 
         if tank.removed_at:

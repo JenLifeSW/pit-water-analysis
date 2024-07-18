@@ -26,6 +26,7 @@ class MeasurementTargetListAPIView(ManagerAPIView):
 class MeasurementHistoryAPIView(ManagerAPIView):
     @swagger_auto_schema(**schema_get_measured_data_detail_dict)
     def get(self, request, tank_id):
+        user = request.user
         target_id = request.query_params.get("target-id")
         weeks = request.query_params.get("weeks")
         start_date = request.query_params.get("start-date")
@@ -40,10 +41,9 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             target = MeasurementTarget.objects.get(id=target_id)
         except:
             raise NotFound404Exception({"message": "측정 항목을 찾을 수 없습니다."})
-        try:
-            tank = Tank.objects.get(id=tank_id)
-        except:
-            raise NotFound404Exception({"message": "수조 정보를 찾을 수 없습니다."})
+
+        from pit_api.tanks.views import TankInfoAPIView
+        tank, _ = TankInfoAPIView().get_tank(tank_id, user)
 
         def ensure_aware(date_str):
             parsed_date = datetime.fromisoformat(date_str)
