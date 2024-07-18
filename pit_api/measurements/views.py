@@ -67,7 +67,9 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             measured_at__range=(start_date, end_date)
         ).order_by("-measured_at")
 
-        last_measured_data = measurement_datas.first() if measurement_datas.exists() else None
+        last_measured_data = MeasurementData.objects.filter(
+            tank_target__in=tank_target_associations
+        ).latest('measured_at')
 
         last_measured_data_serializer = LastMeasuredDataSerializer({
             "last_measured_data": last_measured_data,
