@@ -1,13 +1,14 @@
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework.response import Response
 
 from pit_api.common.exceptions import NotFound404Exception, Conflict409Exception, BadRequest400Exception
 from pit_api.common.views import ManagerAPIView
 from pit_api.fish_species.models import FishSpecies
 from pit_api.hatcheries.models import HatcheryManagerAssociation, Hatchery
+from pit_api.measurements.models import MeasurementTarget, TankTargetAssociation
 from pit_api.tanks.models import Tank
 from pit_api.tanks.serializers import TankSerializer, TankDetailSerializer, TankInfoSerializer
 from pit_api.tanks.swaggers import schema_add_tank_dict, schema_get_tank_info_dict, schema_update_tank_info_dict, \
@@ -32,15 +33,22 @@ class AddTankAPIView(ManagerAPIView):
         except:
             raise NotFound404Exception({"message": "어종 정보를 찾을 수 없습니다."})
 
-        if name:
-            if Tank.objects.filter(hatchery=hatchery, name=name).exists():
-                raise Conflict409Exception({"message": "이미 사용중인 수조 이름입니다."})
+        if Tank.objects.filter(hatchery=hatchery, name=name).exists():
+            raise Conflict409Exception({"message": "이미 사용중인 수조 이름입니다."})
 
         serializer = TankSerializer(data=request.data)
         if not serializer.is_valid():
             return serializer.get_error_response()
 
-        serializer.save(hatchery=hatchery, fish_species=fish_species)
+        tank = serializer.save(hatchery=hatchery, fish_species=fish_species)
+        target_ids = [1, 2, 3, 4]
+        for target_id in target_ids:
+            try:
+                target = MeasurementTarget.objects.get(id=target_id)
+            except:
+                raise APIException({"message": "수조를 추가하지 못했습니다. 관리자에게 문의하세요."})
+
+            TankTargetAssociation.objects.create(tank=tank, target=target)
 
         tanks = Tank.objects.filter(hatchery=hatchery)
         tanks_serializer = TankInfoSerializer(tanks, many=True)
