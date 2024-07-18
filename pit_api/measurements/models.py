@@ -1,9 +1,13 @@
 from django.db import models
+from django.utils import timezone
 
 from pit_api.tanks.models import Tank
 
 
 class MeasurementTarget(models.Model):
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = "measurement_target"
 
@@ -12,6 +16,9 @@ class MeasurementTarget(models.Model):
 
 
 class TankTargetAssociation(models.Model):
+    def __str__(self):
+        return f"{self.tank} - {self.target}"
+
     class Meta:
         db_table = "tank_target_association"
 
@@ -25,5 +32,10 @@ class MeasurementData(models.Model):
 
     tank_target = models.ForeignKey(TankTargetAssociation, on_delete=models.PROTECT)
     value = models.FloatField(null=False)
-    measured_at = models.DateTimeField(auto_now_add=True)
+    measured_at = models.DateTimeField()
     index = models.PositiveIntegerField(null=False)
+
+    def save(self, *args, **kwargs):
+        if not self.measured_at:
+            self.measured_at = timezone.now()
+        super().save(*args, **kwargs)

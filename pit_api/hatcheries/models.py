@@ -5,6 +5,9 @@ from pit_api.users.models import User
 
 
 class Hatchery(models.Model):
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = "hatchery"
 

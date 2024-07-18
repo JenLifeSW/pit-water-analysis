@@ -6,6 +6,9 @@ from pit_api.hatcheries.models import Hatchery
 
 
 class Tank(models.Model):
+    def __str__(self):
+        return f"{self.hatchery} [{self.name}]"
+
     class Meta:
         db_table = "tank"
 

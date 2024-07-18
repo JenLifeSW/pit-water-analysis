@@ -4,6 +4,9 @@ from pit_api.measurements.models import MeasurementTarget
 
 
 class Grade(models.Model):
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = "grade"
 
