@@ -38,8 +38,8 @@ class _TankInfoSetUppedTestCase(_AddTankSetUppedTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("tank", response.data)
         self.assertIn("fishSpecies", response.data["tank"])
-        self.assertIn("measurementDatas", response.data["tank"])
-        self.assertIn("target", response.data["tank"]["measurementDatas"][0])
+        self.assertIn("lastMeasurementDatas", response.data["tank"])
+        self.assertIn("target", response.data["tank"]["lastMeasurementDatas"][0])
 
 
 class TestAPIAddTank(_AddTankSetUppedTestCase):

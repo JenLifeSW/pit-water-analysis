@@ -58,10 +58,10 @@ class TankInfoSerializer(BaseSerializer):
 class TankDetailSerializer(BaseSerializer):
     class Meta:
         model = Tank
-        fields = ["id", "name", "description", "fishSpecies", "measurementDatas"]
+        fields = ["id", "name", "description", "fishSpecies", "lastMeasurementDatas"]
 
     fishSpecies = serializers.SerializerMethodField()
-    measurementDatas = serializers.SerializerMethodField()
+    lastMeasurementDatas = serializers.SerializerMethodField()
 
     def get_fishSpecies(self, obj):
         fish_species = obj.fish_species
@@ -70,7 +70,7 @@ class TankDetailSerializer(BaseSerializer):
             "name": fish_species.name
         }
 
-    def get_measurementDatas(self, obj):
+    def get_lastMeasurementDatas(self, obj):
         tank_targets = TankTargetAssociation.objects.filter(tank=obj).select_related('target')
 
         measurement_datas = []

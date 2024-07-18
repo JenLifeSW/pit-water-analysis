@@ -22,10 +22,10 @@ class MeasurementTargetDisplaySerializer(BaseSerializer):
 class MeasurementDataSerializer(BaseSerializer):
     class Meta:
         model = MeasurementData
-        fields = ["target", "lastMeasuredAt", "value", "grade", "textColor", "backgroundColor"]
+        fields = ["target", "measuredAt", "value", "grade", "textColor", "backgroundColor"]
 
     target = MeasurementTargetDisplaySerializer(source="tank_target.target")
-    lastMeasuredAt = serializers.DateTimeField(source="measured_at", format="%Y-%m-%dT%H:%M:%S", required=False)
+    measuredAt = serializers.DateTimeField(source="measured_at", format="%Y-%m-%dT%H:%M:%S", required=False)
     grade = serializers.SerializerMethodField()
     textColor = serializers.SerializerMethodField()
     backgroundColor = serializers.SerializerMethodField()

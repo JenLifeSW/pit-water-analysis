@@ -162,7 +162,7 @@ class TestAPIGetHatcheryInfo(_HatcheryInfoSetUppedTestCaseWithManagerAuth):
         self.assertIn("hatchery", response.data)
         self.assertIn("tanks", response.data["hatchery"])
         self.assertIn("fishSpecies", response.data["hatchery"]["tanks"][0])
-        self.assertIn("measurementDatas", response.data["hatchery"]["tanks"][0])
+        self.assertIn("lastMeasurementDatas", response.data["hatchery"]["tanks"][0])
 
     def test_try_forbidden_user(self):
         self.set_forbidden_user()
