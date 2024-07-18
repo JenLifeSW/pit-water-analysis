@@ -73,6 +73,12 @@ LOGGING = {
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(", ")
 
+# CSRF_TRUSTED_ORIGINS = env("ALLOWED_HOSTS").split(", ")
+
+# CSRF_COOKIE_SECURE = True
+
+# SESSION_COOKIE_SECURE = True
+
 # Application definition
 
 INSTALLED_APPS = [
