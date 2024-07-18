@@ -26,25 +26,17 @@ class MeasurementDataSerializer(BaseSerializer):
 
     target = MeasurementTargetDisplaySerializer(source="tank_target.target")
     lastMeasuredAt = serializers.DateTimeField(source="measured_at", format="%Y-%m-%dT%H:%M:%S", required=False)
-    value = serializers.SerializerMethodField()
     grade = serializers.SerializerMethodField()
     textColor = serializers.SerializerMethodField()
     backgroundColor = serializers.SerializerMethodField()
-
-    def get_value(self, obj):
-        if obj.value is not None:
-            target = obj.tank_target.target
-            value = obj.value
-            return round(value * target.display_multiplier, 4)
-        return None
 
     def _get_grade_standard(self, obj):
         if obj.value is not None:
             target = obj.tank_target.target
             grade_standard = GradeStandard.objects.filter(
                 target=target,
-                min_value__lte=self.get_value(obj),
-                max_value__gte=self.get_value(obj)
+                min_value__lte=obj.value,  # self.get_value(obj),
+                max_value__gte=obj.value  # self.get_value(obj)
             ).first()
             return grade_standard
         return None
@@ -68,22 +60,14 @@ class MeasurementHistorySerializer(BaseSerializer):
         fields = ["measuredAt", "value"]
 
     measuredAt = serializers.DateTimeField(source="measured_at", format="%Y-%m-%dT%H:%M:%S")
-    value = serializers.SerializerMethodField()
-
-    def get_value(self, obj):
-        target = obj.tank_target.target
-        value = obj.value
-
-        return round(value * target.display_multiplier, 4)
 
 
 class LastMeasuredDataSerializer(serializers.Serializer):
     def to_representation(self, instance):
         last_measured_data = instance.get("last_measured_data")
-        target = instance.get("target")
 
         if last_measured_data:
-            last_measured_value = round(last_measured_data.value * target.display_multiplier, 4)
+            last_measured_value = round(last_measured_data.value, 4)
             last_measured_at = last_measured_data.measured_at.strftime("%Y-%m-%dT%H:%M:%S")
         else:
             last_measured_value = None

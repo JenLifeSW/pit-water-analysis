@@ -112,7 +112,7 @@ class _HatcheryInfoSetUppedTestCase(AuthenticatedAdminAPITestCase):
         cls.fish_species = FishSpecies.objects.get(id=cls.fish_species_id)
         cls.tank = Tank.objects.create(name=cls.tank_name, hatchery=cls.hatchery, fish_species=cls.fish_species)
 
-        target = MeasurementTarget.objects.create(name="질산성질소", display_unit="ppm", display_multiplier=1.0)
+        target = MeasurementTarget.objects.create(name="질산성질소", display_unit="ppm")
         TankTargetAssociation.objects.create(tank=cls.tank, target=target)
 
     def set_forbidden_user(self):

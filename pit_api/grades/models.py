@@ -18,5 +18,5 @@ class GradeStandard(models.Model):
 
     target = models.ForeignKey(MeasurementTarget, on_delete=models.CASCADE)
     grade = models.ForeignKey(Grade, on_delete=models.PROTECT)
-    min_value = models.PositiveIntegerField(null=False, default=0)
-    max_value = models.PositiveIntegerField(null=False, default=999999)
+    min_value = models.FloatField(null=True, default=0)
+    max_value = models.FloatField(null=True, default=999999)

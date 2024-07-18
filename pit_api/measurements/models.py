@@ -9,7 +9,6 @@ class MeasurementTarget(models.Model):
 
     name = models.CharField(max_length=16, null=False, blank=False)
     display_unit = models.CharField(max_length=8, null=False, blank=False)
-    display_multiplier = models.FloatField(default=1.0)
 
 
 class TankTargetAssociation(models.Model):
@@ -25,6 +24,6 @@ class MeasurementData(models.Model):
         db_table = "measurement_data"
 
     tank_target = models.ForeignKey(TankTargetAssociation, on_delete=models.PROTECT)
-    value = models.PositiveIntegerField(null=False)
+    value = models.FloatField(null=False)
     measured_at = models.DateTimeField(auto_now_add=True)
     index = models.PositiveIntegerField(null=False)

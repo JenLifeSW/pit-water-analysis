@@ -20,8 +20,8 @@ def create_initial_datas(sender, **kwargs):
         FishSpecies.objects.create(name="우럭")
 
     if not MeasurementTarget.objects.exists():
-        MeasurementTarget.objects.create(name="질산성 질소", display_unit="ppm", display_multiplier="0.001")
-        MeasurementTarget.objects.create(name="온도", display_unit="˚C", display_multiplier=1)
+        MeasurementTarget.objects.create(name="질산성 질소", display_unit="ppm")
+        MeasurementTarget.objects.create(name="온도", display_unit="˚C")
 
     if not Grade.objects.exists():
         Grade.objects.create(name="안전", text_color="#00D2D2", background_color="#D7F6F6")
