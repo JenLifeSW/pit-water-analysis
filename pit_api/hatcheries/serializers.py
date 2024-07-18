@@ -48,8 +48,12 @@ class HatcheryDetailSerializer(BaseSerializer):
         fields = ["id", "name", "description", "address", "addressDetail", "tanks", "image"]
 
     addressDetail = serializers.CharField(source='address_detail', required=False)
-    tanks = TankDetailSerializer(many=True)
+    tanks = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+
+    def get_tanks(self, obj):
+        tanks = obj.tanks.filter(removed_at__isnull=True)
+        return TankDetailSerializer(tanks, many=True).data
 
     def get_image(self, obj):
         return ""
