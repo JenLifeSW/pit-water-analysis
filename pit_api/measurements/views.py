@@ -11,9 +11,8 @@ from pit_api.grades.models import GradeStandard
 from pit_api.grades.serializers import GradeSerializer
 from pit_api.measurements.models import MeasurementTarget, MeasurementData, TankTargetAssociation
 from pit_api.measurements.serializers import MeasurementTargetSerializer, MeasurementTargetDisplaySerializer, \
-    MeasurementHistorySerializer, LastMeasuredDataSerializer
+    MeasurementHistorySerializer
 from pit_api.measurements.swaggers import schema_get_measured_data_detail_dict
-from pit_api.tanks.models import Tank
 
 
 class MeasurementTargetListAPIView(ManagerAPIView):
@@ -69,22 +68,18 @@ class MeasurementHistoryAPIView(ManagerAPIView):
 
         last_measured_data = MeasurementData.objects.filter(
             tank_target__in=tank_target_associations
-        ).latest('measured_at')
-
-        last_measured_data_serializer = LastMeasuredDataSerializer({
-            "last_measured_data": last_measured_data,
-            "target": target
-        })
+        ).first()
 
         grade_standards = GradeStandard.objects.filter(target=target)
 
         target_serializer = MeasurementTargetDisplaySerializer(target)
+        last_measured_data_serializer = MeasurementHistorySerializer(last_measured_data)
         data_serializer = MeasurementHistorySerializer(measurement_datas, many=True)
         grade_serializer = GradeSerializer(grade_standards, many=True)
 
         response_data = {
             "target": target_serializer.data,
-            **last_measured_data_serializer.data,
+            "lastMeasurementData": last_measured_data_serializer.data,
             "measurementDatas": data_serializer.data,
             "grades": grade_serializer.data
         }
