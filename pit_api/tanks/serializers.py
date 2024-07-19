@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from pit_api.common.base_serializers import BaseSerializer
@@ -58,9 +59,10 @@ class TankInfoSerializer(BaseSerializer):
 class TankDetailSerializer(BaseSerializer):
     class Meta:
         model = Tank
-        fields = ["id", "name", "description", "fishSpecies", "lastMeasurementDatas"]
+        fields = ["id", "name", "description", "fishSpecies", "lastUpdatedAt", "lastMeasurementDatas"]
 
     fishSpecies = serializers.SerializerMethodField()
+    lastUpdatedAt = serializers.SerializerMethodField()
     lastMeasurementDatas = serializers.SerializerMethodField()
 
     def get_fishSpecies(self, obj):
@@ -69,6 +71,17 @@ class TankDetailSerializer(BaseSerializer):
             "id": fish_species.id,
             "name": fish_species.name
         }
+
+    def get_lastUpdatedAt(self, obj):
+        last_measurement = MeasurementData.objects.filter(
+            tank_target__tank=obj
+        ).order_by('-measured_at').first()
+
+        if last_measurement and last_measurement.measured_at:
+            server_timezone = timezone.get_current_timezone()
+            localized_time = timezone.localtime(last_measurement.measured_at, server_timezone)
+            return localized_time.strftime("%Y-%m-%dT%H:%M:%S")
+        return None
 
     def get_lastMeasurementDatas(self, obj):
         tank_targets = TankTargetAssociation.objects.filter(tank=obj).select_related('target')
