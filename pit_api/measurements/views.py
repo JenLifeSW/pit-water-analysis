@@ -68,7 +68,7 @@ class MeasurementHistoryAPIView(ManagerAPIView):
 
         last_measured_data = MeasurementData.objects.filter(
             tank_target__in=tank_target_associations
-        ).first()
+        ).order_by("-measured_at").first()
 
         grade_standards = GradeStandard.objects.filter(target=target)
 
