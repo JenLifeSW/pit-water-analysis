@@ -54,7 +54,7 @@ parameters_measured_data_detail = parameters_authorization[:] + [
         required=True
     ),
     openapi.Parameter(
-        "weeks",
+        "duration",
         openapi.IN_QUERY,
         description="검색할 기간",
         type=openapi.TYPE_INTEGER,

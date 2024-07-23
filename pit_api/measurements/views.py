@@ -27,22 +27,20 @@ class MeasurementHistoryAPIView(ManagerAPIView):
     def get(self, request, tank_id):
         user = request.user
         target_id = request.query_params.get("target-id")
-        weeks = request.query_params.get("weeks")
+        # weeks = request.query_params.get("weeks")
+        duration = request.query_params.get("duration")
         start_date = request.query_params.get("start-date")
         end_date = request.query_params.get("end-date")
 
         if not target_id:
             raise BadRequest400Exception({"message": "측정 항목 id를 입력하세요."})
-        if not weeks:
-            weeks = 4
+        # if not weeks:
+        weeks = 4
 
         try:
             target = MeasurementTarget.objects.get(id=target_id)
         except:
             raise NotFound404Exception({"message": "측정 항목을 찾을 수 없습니다."})
-
-        from pit_api.tanks.views import TankInfoAPIView
-        tank, _ = TankInfoAPIView().get_tank(tank_id, user)
 
         def ensure_aware(date_str):
             parsed_date = datetime.fromisoformat(date_str)
@@ -50,25 +48,97 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 return timezone.make_aware(parsed_date, timezone.get_current_timezone())
             return parsed_date
 
-        if end_date:
-            end_date = ensure_aware(end_date)
-            if start_date:
-                start_date = ensure_aware(start_date)
-            else:
-                start_date = end_date - timezone.timedelta(weeks=int(weeks))
-        else:
+        if duration and (duration == "1mon" or duration == "3mon" or duration == "1y"):
             end_date = timezone.now()
-            start_date = end_date - timezone.timedelta(weeks=int(weeks))
+            if duration == "1mon":
+                start_date = end_date - timezone.timedelta(days=31)
+            elif duration == "3mon":
+                start_date = end_date - timezone.timedelta(days=90)
+            elif duration == "1y":
+                start_date = end_date - timezone.timedelta(days=365)
+
+        else:
+            if end_date:
+                end_date = ensure_aware(end_date)
+                if start_date:
+                    start_date = ensure_aware(start_date)
+                else:
+                    start_date = end_date - timezone.timedelta(weeks=int(weeks))
+            else:
+                end_date = timezone.now()
+                start_date = end_date - timezone.timedelta(weeks=int(weeks))
+
+        q_start_date = start_date.strftime('%Y-%m-%d')
+        q_end_date = end_date.strftime('%Y-%m-%d')
+
+        from pit_api.tanks.views import TankInfoAPIView
+        tank, _ = TankInfoAPIView().get_tank(tank_id, user)
 
         tank_target_associations = TankTargetAssociation.objects.filter(tank=tank, target=target)
-        measurement_datas = MeasurementData.objects.filter(
-            tank_target__in=tank_target_associations,
-            measured_at__range=(start_date, end_date)
-        ).order_by("-measured_at")
 
         last_measured_data = MeasurementData.objects.filter(
             tank_target__in=tank_target_associations
         ).order_by("-measured_at").first()
+
+        measurement_datas = []
+
+        if duration == "3mon":
+            start_date_aware = ensure_aware(start_date.isoformat())
+            end_date_aware = ensure_aware(end_date.isoformat())
+            delta = timezone.timedelta(days=3)
+            grouped_measurements = []
+
+            while start_date_aware < end_date_aware:
+                group_end_date = start_date_aware + delta
+                group_measurement = MeasurementData.objects.filter(
+                    tank_target__in=tank_target_associations,
+                    measured_at__range=(start_date_aware, group_end_date)
+                ).order_by('-value').first()
+
+                if group_measurement is not None:
+                    grouped_measurements.append(group_measurement)
+
+                start_date_aware = group_end_date
+
+            measurement_datas = grouped_measurements
+
+        elif duration == "1y":
+            start_date_aware = ensure_aware(start_date.isoformat())
+            end_date_aware = ensure_aware(end_date.isoformat())
+
+            first_group_end_date = start_date_aware + timezone.timedelta(days=15)
+            first_group_measurement = MeasurementData.objects.filter(
+                tank_target__in=tank_target_associations,
+                measured_at__range=(start_date_aware, first_group_end_date)
+            ).order_by('-value').first()
+
+            if first_group_measurement is not None:
+                measurement_datas.append(first_group_measurement)
+
+            start_date_aware = first_group_end_date
+
+            delta = timezone.timedelta(days=10)
+            grouped_measurements = []
+
+            while start_date_aware < end_date_aware and len(grouped_measurements) < 35:
+                group_end_date = start_date_aware + delta
+                group_measurement = MeasurementData.objects.filter(
+                    tank_target__in=tank_target_associations,
+                    measured_at__range=(start_date_aware, group_end_date)
+                ).order_by('-value').first()
+
+                if group_measurement is not None:
+                    grouped_measurements.append(group_measurement)
+
+                start_date_aware = group_end_date
+
+            measurement_datas.extend(grouped_measurements)
+
+        else:
+            measurement_datas = MeasurementData.objects.filter(
+                tank_target__in=tank_target_associations,
+                measured_at__range=(start_date, end_date)
+            ).order_by("-measured_at")
 
         grade_standards = GradeStandard.objects.filter(target=target)
 
@@ -80,6 +150,8 @@ class MeasurementHistoryAPIView(ManagerAPIView):
         response_data = {
             "target": target_serializer.data,
             "lastMeasurementData": last_measured_data_serializer.data,
+            "startDate": q_start_date,
+            "endDate": q_end_date,
             "measurementDatas": data_serializer.data,
             "grades": grade_serializer.data
         }
