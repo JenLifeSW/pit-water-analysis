@@ -27,6 +27,11 @@ schema_measured_data_detail = openapi.Schema(
             properties=properties_measurement_target,
             description="측정 타겟"
         ),
+        "lastMeasurementData": openapi.Schema(
+            type=openapi.TYPE_OBJECT, properties=properties_measured_data
+        ),
+        "startDate": openapi.Schema(type=openapi.TYPE_STRING, description="조회 시작 일"),
+        "endDate": openapi.Schema(type=openapi.TYPE_STRING, description="조회 종료 일"),
         "measurementDatas": openapi.Schema(
             type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
