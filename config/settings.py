@@ -70,7 +70,6 @@ LOGGING = {
     }
 }
 
-
 ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(", ")
 
 # CSRF_TRUSTED_ORIGINS = env("ALLOWED_HOSTS").split(", ")
@@ -115,9 +114,26 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = "pit_api.User"
 
+
+def get_timedelta(value, unit):
+    if unit == 'days':
+        return timedelta(days=int(value))
+    elif unit == 'hours':
+        return timedelta(hours=int(value))
+    elif unit == 'minutes':
+        return timedelta(minutes=int(value))
+    else:
+        raise ValueError("Invalid time unit for JWT lifetime")
+
+
+ACCESS_TOKEN_LIFETIME_VALUE = env("JWT_ACCESS_TOKEN_LIFETIME_VALUE")
+ACCESS_TOKEN_LIFETIME_UNIT = env("JWT_ACCESS_TOKEN_LIFETIME_UNIT")
+REFRESH_TOKEN_LIFETIME_VALUE = env("JWT_REFRESH_TOKEN_LIFETIME_VALUE")
+REFRESH_TOKEN_LIFETIME_UNIT = env("JWT_REFRESH_TOKEN_LIFETIME_UNIT")
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': get_timedelta(ACCESS_TOKEN_LIFETIME_VALUE, ACCESS_TOKEN_LIFETIME_UNIT),
+    'REFRESH_TOKEN_LIFETIME': get_timedelta(REFRESH_TOKEN_LIFETIME_VALUE, REFRESH_TOKEN_LIFETIME_UNIT),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,
