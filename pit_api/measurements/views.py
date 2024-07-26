@@ -27,15 +27,12 @@ class MeasurementHistoryAPIView(ManagerAPIView):
     def get(self, request, tank_id):
         user = request.user
         target_id = request.query_params.get("target-id")
-        # weeks = request.query_params.get("weeks")
         duration = request.query_params.get("duration")
         start_date = request.query_params.get("start-date")
         end_date = request.query_params.get("end-date")
 
         if not target_id:
             raise BadRequest400Exception({"message": "측정 항목 id를 입력하세요."})
-        # if not weeks:
-        weeks = 4
 
         try:
             target = MeasurementTarget.objects.get(id=target_id)
@@ -48,10 +45,28 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 return timezone.make_aware(parsed_date, timezone.get_current_timezone())
             return parsed_date
 
+        def transform_measured_at(start_date, end_date):
+            def re_format(obj):
+                if obj.year == datetime.now().year:
+                    return obj.strftime("%m.%d")
+                return obj.strftime("%Y.%m.%d")
+
+            start_date_str = re_format(start_date)
+            end_date_str = re_format(end_date)
+            if start_date_str == end_date_str:
+                return start_date_str
+            return f"{start_date_str}-{end_date_str}"
+
+        def adjust_to_midnight(dt):
+            if dt.hour < 12:
+                return dt.replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                return (dt + timezone.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+
         if duration and (duration == "1mon" or duration == "3mon" or duration == "1y"):
-            end_date = timezone.now()
+            end_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
             if duration == "1mon":
-                start_date = end_date - timezone.timedelta(days=31)
+                start_date = end_date - timezone.timedelta(days=30)
             elif duration == "3mon":
                 start_date = end_date - timezone.timedelta(days=90)
             elif duration == "1y":
@@ -63,13 +78,14 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 if start_date:
                     start_date = ensure_aware(start_date)
                 else:
-                    start_date = end_date - timezone.timedelta(weeks=int(weeks))
+                    start_date = end_date - timezone.timedelta(days=30)
             else:
-                end_date = timezone.now()
-                start_date = end_date - timezone.timedelta(weeks=int(weeks))
+                end_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                start_date = end_date - timezone.timedelta(days=30)
 
         q_start_date = start_date.strftime('%Y-%m-%d')
         q_end_date = end_date.strftime('%Y-%m-%d')
+        end_date = end_date + timezone.timedelta(days=1)
 
         from pit_api.tanks.views import TankInfoAPIView
         tank, _ = TankInfoAPIView().get_tank(tank_id, user)
@@ -80,71 +96,48 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             tank_target__in=tank_target_associations
         ).order_by("-measured_at").first()
 
+        grade_standards = GradeStandard.objects.filter(target=target)
+        if grade_standards:
+            min_value_grade_standard = grade_standards.order_by('min_value').first().min_value
+        else:
+            min_value_grade_standard = 0
         measurement_datas = []
 
-        if duration == "3mon":
-            start_date_aware = ensure_aware(start_date.isoformat())
-            end_date_aware = ensure_aware(end_date.isoformat())
-            delta = timezone.timedelta(days=3)
-            grouped_measurements = []
+        total_days = (end_date - start_date).days
+        if total_days <= 30:
+            delta_days = 1
+        else:
+            delta_days = total_days / 30.0
 
-            while start_date_aware < end_date_aware:
-                group_end_date = start_date_aware + delta
-                group_measurement = MeasurementData.objects.filter(
-                    tank_target__in=tank_target_associations,
-                    measured_at__range=(start_date_aware, group_end_date)
-                ).order_by('-value').first()
+        delta_seconds = delta_days * 24 * 60 * 60
+        delta = timezone.timedelta(seconds=delta_seconds)
 
-                if group_measurement is not None:
-                    grouped_measurements.append(group_measurement)
+        start_date_aware = ensure_aware(start_date.isoformat())
+        end_date_aware = ensure_aware(end_date.isoformat())
+        ref_date = start_date_aware
 
-                start_date_aware = group_end_date
+        while adjust_to_midnight(ref_date) < end_date_aware:
+            group_start_date = adjust_to_midnight(ref_date)
+            group_end_date = adjust_to_midnight(ref_date + delta) - timezone.timedelta(microseconds=1)
 
-            measurement_datas = grouped_measurements
-
-        elif duration == "1y":
-            start_date_aware = ensure_aware(start_date.isoformat())
-            end_date_aware = ensure_aware(end_date.isoformat())
-
-            first_group_end_date = start_date_aware + timezone.timedelta(days=15)
-            first_group_measurement = MeasurementData.objects.filter(
+            group_measurement = MeasurementData.objects.filter(
                 tank_target__in=tank_target_associations,
-                measured_at__range=(start_date_aware, first_group_end_date)
+                measured_at__range=(group_start_date, group_end_date)
             ).order_by('-value').first()
 
-            if first_group_measurement is not None:
-                measurement_datas.append(first_group_measurement)
+            measured_at_str = transform_measured_at(group_start_date, group_end_date)
+            if group_measurement is not None:
+                value = group_measurement.value
+            else:
+                value = min_value_grade_standard
+            measurement_datas.append({"measuredAt": measured_at_str, "value": value})
 
-            start_date_aware = first_group_end_date
-
-            delta = timezone.timedelta(days=10)
-            grouped_measurements = []
-
-            while start_date_aware < end_date_aware and len(grouped_measurements) < 35:
-                group_end_date = start_date_aware + delta
-                group_measurement = MeasurementData.objects.filter(
-                    tank_target__in=tank_target_associations,
-                    measured_at__range=(start_date_aware, group_end_date)
-                ).order_by('-value').first()
-
-                if group_measurement is not None:
-                    grouped_measurements.append(group_measurement)
-
-                start_date_aware = group_end_date
-
-            measurement_datas.extend(grouped_measurements)
-
-        else:
-            measurement_datas = MeasurementData.objects.filter(
-                tank_target__in=tank_target_associations,
-                measured_at__range=(start_date, end_date)
-            ).order_by("-measured_at")
+            ref_date = ref_date + delta
 
         grade_standards = GradeStandard.objects.filter(target=target)
 
         target_serializer = MeasurementTargetDisplaySerializer(target)
         last_measured_data_serializer = MeasurementHistorySerializer(last_measured_data)
-        data_serializer = MeasurementHistorySerializer(measurement_datas, many=True)
         grade_serializer = GradeSerializer(grade_standards, many=True)
 
         response_data = {
@@ -152,7 +145,7 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             "lastMeasurementData": last_measured_data_serializer.data,
             "startDate": q_start_date,
             "endDate": q_end_date,
-            "measurementDatas": data_serializer.data,
+            "measurementDatas": measurement_datas,
             "grades": grade_serializer.data
         }
 

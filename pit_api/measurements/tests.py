@@ -29,6 +29,12 @@ class TestAPIGetMeasuredDatas(_TankInfoSetUppedTestCase):
         response = self.client.get(self.url, params)
         self.assert_success(response)
 
+    def test_success_distribute_period(self):
+        params = {"target-id": self.target.id, "start-date": "2024-06-01", "end-date": "2024-06-10"}
+        response = self.client.get(self.url, params)
+        self.assert_success(response)
+        self.assertEqual(len(response.data["measurementDatas"]), 10)
+
     def test_no_query_fail(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
