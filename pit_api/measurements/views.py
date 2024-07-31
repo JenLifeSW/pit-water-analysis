@@ -133,7 +133,7 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 value = group_measurement.value
             else:
                 value = min_value_grade_standard
-            measurement_datas.append({"measuredAt": dates[n], "value": value, "detail": measured_at_str})
+            measurement_datas.append({"measuredAt": dates[n], "value": value, "detailText": measured_at_str})
 
             ref_date = ref_date + delta
             n += 1
