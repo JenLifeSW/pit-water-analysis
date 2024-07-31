@@ -12,6 +12,12 @@ properties_measured_data = {
     "value": openapi.Schema(type=openapi.TYPE_INTEGER, description="측정 값"),
 }
 
+properties_measured_data_with_detail = {
+    "measuredAt": openapi.Schema(type=openapi.TYPE_STRING, description="그래프 표시 시간"),
+    "value": openapi.Schema(type=openapi.TYPE_INTEGER, description="측정 값"),
+    "detailText": openapi.Schema(type=openapi.TYPE_STRING, description="상세 표기 텍스트")
+}
+
 properties_grades = {
     "name": openapi.Schema(type=openapi.TYPE_STRING, description="등급 이름"),
     "color": openapi.Schema(type=openapi.TYPE_STRING, description="등급 색상"),
@@ -30,12 +36,10 @@ schema_measured_data_detail = openapi.Schema(
         "lastMeasurementData": openapi.Schema(
             type=openapi.TYPE_OBJECT, properties=properties_measured_data
         ),
-        "startDate": openapi.Schema(type=openapi.TYPE_STRING, description="조회 시작 일"),
-        "endDate": openapi.Schema(type=openapi.TYPE_STRING, description="조회 종료 일"),
         "measurementDatas": openapi.Schema(
             type=openapi.TYPE_ARRAY, items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
-                properties=properties_measured_data,
+                properties=properties_measured_data_with_detail,
                 description="측정 데이터"
             )
         ),

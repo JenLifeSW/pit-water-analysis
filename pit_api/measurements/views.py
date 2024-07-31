@@ -83,8 +83,6 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 end_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 start_date = end_date - timezone.timedelta(days=30)
 
-        q_start_date = start_date.strftime('%Y-%m-%d')
-        q_end_date = end_date.strftime('%Y-%m-%d')
         end_date = end_date + timezone.timedelta(days=1)
 
         from pit_api.tanks.views import TankInfoAPIView
@@ -103,7 +101,8 @@ class MeasurementHistoryAPIView(ManagerAPIView):
             min_value_grade_standard = 0
         measurement_datas = []
 
-        total_days = (end_date - start_date).days
+        total_duration = end_date - start_date
+        total_days = total_duration.days
         if total_days <= 30:
             delta_days = 1
         else:
@@ -116,6 +115,10 @@ class MeasurementHistoryAPIView(ManagerAPIView):
         end_date_aware = ensure_aware(end_date.isoformat())
         ref_date = start_date_aware
 
+        set_len = total_days if total_days <= 30 else 30
+        set_interval = (total_duration - timezone.timedelta(1)) / (set_len - 1)
+        dates = [adjust_to_midnight(start_date + i * set_interval) for i in range(set_len)]
+        n = 0
         while adjust_to_midnight(ref_date) < end_date_aware:
             group_start_date = adjust_to_midnight(ref_date)
             group_end_date = adjust_to_midnight(ref_date + delta) - timezone.timedelta(microseconds=1)
@@ -130,9 +133,10 @@ class MeasurementHistoryAPIView(ManagerAPIView):
                 value = group_measurement.value
             else:
                 value = min_value_grade_standard
-            measurement_datas.append({"measuredAt": measured_at_str, "value": value})
+            measurement_datas.append({"measuredAt": dates[n], "value": value, "detail": measured_at_str})
 
             ref_date = ref_date + delta
+            n += 1
 
         grade_standards = GradeStandard.objects.filter(target=target)
 
@@ -143,8 +147,6 @@ class MeasurementHistoryAPIView(ManagerAPIView):
         response_data = {
             "target": target_serializer.data,
             "lastMeasurementData": last_measured_data_serializer.data,
-            "startDate": q_start_date,
-            "endDate": q_end_date,
             "measurementDatas": measurement_datas,
             "grades": grade_serializer.data
         }
