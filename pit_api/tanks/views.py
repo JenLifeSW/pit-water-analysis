@@ -111,7 +111,10 @@ class TankInfoAPIView(ManagerAPIView):
     @swagger_auto_schema(**schema_delete_tank_info_dict)
     def delete(self, request, tank_id):
         user = request.user
-        tank, _ = self.get_tank(tank_id, user)
+        tank, hatchery = self.get_tank(tank_id, user)
         tank.delete()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        tanks = hatchery.tanks.filter(removed_at__isnull=True)
+        serializer = TankDetailSerializer(tanks, many=True)
+
+        return Response({"tanks": serializer.data}, status=status.HTTP_200_OK)

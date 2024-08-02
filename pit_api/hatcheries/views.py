@@ -103,4 +103,7 @@ class HatcheryInfoAPIView(ManagerAPIView):
         hatchery = self.get_hatchery(hatchery_id, user)
         hatchery.delete()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user, removed_at__isnull=True)
+        serializer = HatcherySerializer(hatcheries, many=True)
+
+        return Response({"hatcheries": serializer.data}, status=status.HTTP_200_OK)
