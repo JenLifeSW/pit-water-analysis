@@ -33,7 +33,7 @@ class AddTankAPIView(ManagerAPIView):
         except:
             raise NotFound404Exception({"message": "어종 정보를 찾을 수 없습니다."})
 
-        if Tank.objects.filter(hatchery=hatchery, name=name).exists():
+        if Tank.objects.filter(hatchery=hatchery, name=name, removed_at__isnull=True).exists():
             raise Conflict409Exception({"message": "이미 사용중인 수조 이름입니다."})
 
         serializer = TankSerializer(data=request.data)
@@ -50,7 +50,7 @@ class AddTankAPIView(ManagerAPIView):
 
             TankTargetAssociation.objects.create(tank=tank, target=target)
 
-        tanks = Tank.objects.filter(hatchery=hatchery)
+        tanks = Tank.objects.filter(hatchery=hatchery, removed_at__isnull=True)
         tanks_serializer = TankInfoSerializer(tanks, many=True)
 
         return Response({"tanks": tanks_serializer.data}, status=status.HTTP_201_CREATED)

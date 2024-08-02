@@ -22,7 +22,9 @@ class HatcheryAPIView(AdminAPIView):
 
         if not name:
             raise BadRequest400Exception({"message": "양식장 이름을 입력하세요."})
-        existing_hatchery = Hatchery.objects.filter(hatcherymanagerassociation__user=user, name=name).exists()
+        existing_hatchery = Hatchery.objects.filter(
+            hatcherymanagerassociation__user=user, name=name, removed_at__isnull=True
+        ).exists()
 
         if existing_hatchery:
             raise Conflict409Exception({"message": "이미 사용중인 양식장 이름입니다."})
@@ -34,7 +36,7 @@ class HatcheryAPIView(AdminAPIView):
 
         HatcheryManagerAssociation.objects.create(hatchery=hatchery, user=user)
 
-        hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user)
+        hatcheries = Hatchery.objects.filter(hatcherymanagerassociation__user=user, removed_at__isnull=True)
         hatcheries_serializer = HatcherySerializer(hatcheries, many=True)
 
         return Response({"hatcheries": hatcheries_serializer.data}, status=status.HTTP_201_CREATED)
