@@ -95,7 +95,7 @@ class LoginAPIView(PublicAPIView):
             response["Authorization"] = f"Bearer {token}/{token.access_token}"
             return response
 
-        raise UnAuthorized401Exception({"message": "아이디 또는 비밀번호를 입력하세요."})
+        raise UnAuthorized401Exception({"message": "아이디 또는 비밀번호를 확인하세요."})
 
 
 class RefreshTokenAPIView(PublicAPIView):

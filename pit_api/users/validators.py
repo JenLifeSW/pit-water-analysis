@@ -10,7 +10,7 @@ class UsernameValidator(BaseValidator):
         if len(value) < 2:
             raise ValidationError("아이디의 길이는 2자 이상이어야 합니다.")
         if len(value) > 12:
-            raise ValidationError("아이디의 길이는 12자를 초과할 수 없습니다.")
+            raise ValidationError("아이디의 길이는 16자를 초과할 수 없습니다.")
         if not re.search(r"^[a-zA-Z0-9]+$", value):
             raise ValidationError("아이디는 영문 대소문자와 숫자만 사용가능합니다.")
 
