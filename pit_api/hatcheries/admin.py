@@ -26,5 +26,6 @@ class HatcheryManagerAssociationAdmin(admin.ModelAdmin):
     search_fields = ("hatchery__name", "user__nickname")
     ordering = ("id", "hatchery__name", "user__nickname")
 
+
 admin.site.register(Hatchery, HatcheryAdmin)
 admin.site.register(HatcheryManagerAssociation, HatcheryManagerAssociationAdmin)
