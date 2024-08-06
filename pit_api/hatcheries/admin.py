@@ -4,7 +4,7 @@ from pit_api.hatcheries.models import Hatchery, HatcheryManagerAssociation
 
 
 class HatcheryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "address", "address_detail", "created_at", "removed_at")
+    list_display = ("id", "name", "description", "address", "address_detail", "image", "created_at", "removed_at")
     search_fields = ("id", "name", "description", "address", "address_detail", "created_at", "removed_at")
     ordering = ("id", "name", "description", "address", "address_detail", "created_at", "removed_at")
 
