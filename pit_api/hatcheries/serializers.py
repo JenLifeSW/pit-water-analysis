@@ -34,12 +34,6 @@ class HatcherySerializer(BaseSerializer):
         validators=[HatcheryAddressValidator()],
         help_text=regex_str_hatchery_description
     )
-    image = serializers.SerializerMethodField(
-        required=False
-    )
-
-    def get_image(self, obj):
-        return ""
 
 
 class HatcheryDetailSerializer(BaseSerializer):
@@ -49,11 +43,7 @@ class HatcheryDetailSerializer(BaseSerializer):
 
     addressDetail = serializers.CharField(source='address_detail', required=False)
     tanks = serializers.SerializerMethodField()
-    image = serializers.SerializerMethodField()
 
     def get_tanks(self, obj):
         tanks = obj.tanks.filter(removed_at__isnull=True)
         return TankDetailSerializer(tanks, many=True).data
-
-    def get_image(self, obj):
-        return ""

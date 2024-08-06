@@ -15,6 +15,7 @@ class Hatchery(models.Model):
     description = models.CharField(max_length=200, null=True)
     address = models.CharField(max_length=50, null=True)
     address_detail = models.CharField(max_length=50, null=True)
+    image = models.URLField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     removed_at = models.DateTimeField(null=True)
 
