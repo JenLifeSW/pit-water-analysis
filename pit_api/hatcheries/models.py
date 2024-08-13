@@ -19,19 +19,6 @@ class Hatchery(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     removed_at = models.DateTimeField(null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.description:
-            self.description = None
-        if not self.address:
-            self.address = None
-        if not self.address_detail:
-            self.address_detail = None
-        if not self.image:
-            self.image = None
-        if not self.removed_at:
-            self.image = None
-        super(Hatchery, self).save(*args, **kwargs)
-
     def delete(self, using=None, keep_parents=False):
         self.removed_at = timezone.now()
         self.save(using=using)
