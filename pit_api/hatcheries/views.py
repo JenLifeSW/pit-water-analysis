@@ -1,16 +1,19 @@
 import random
+import uuid
 
+import boto3
 import environ
+from django.conf import settings
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework.response import Response
 
 from pit_api.common.exceptions import BadRequest400Exception, NotFound404Exception, Conflict409Exception
 from pit_api.common.permissions import IsAdminRole
 from pit_api.common.views import AdminAPIView, ManagerAPIView
-from pit_api.hatcheries.models import Hatchery, HatcheryManagerAssociation
+from pit_api.hatcheries.models import Hatchery, HatcheryManagerAssociation, HatcheryImage
 from pit_api.hatcheries.serializers import HatcherySerializer, HatcheryDetailSerializer
 from pit_api.hatcheries.swaggers import schema_get_hatchery_list_dict, schema_add_hatchery_dict, \
     schema_get_hatchery_info_dict, schema_update_hatchery_info_dict, schema_delete_hatchery_info_dict
@@ -119,3 +122,45 @@ class HatcheryInfoAPIView(ManagerAPIView):
         serializer = HatcherySerializer(hatcheries, many=True)
 
         return Response({"hatcheries": serializer.data}, status=status.HTTP_200_OK)
+
+
+class GenerateImagePreSignedURL(AdminAPIView):
+    @transaction.atomic
+    def post(self, request):
+        allowed_types = ["image/jpeg", "image/png"]
+        content_type = request.data.get('contentType')
+        if not content_type:
+            raise BadRequest400Exception({"message": "contentType 값이 제공되지 않았습니다."})
+
+        if content_type not in allowed_types:
+            raise BadRequest400Exception({"message": "잘못된 파일 형식입니다."})
+
+        file_extension = content_type.split("/")[-1]
+
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        file_name = f"images/{uuid.uuid4()}.{file_extension}"
+
+        try:
+            presigned_url = s3_client.generate_presigned_url(
+                "put_object",
+                Params={
+                    "Bucket": bucket_name,
+                    "Key": file_name,
+                    "ContentType": content_type
+                },
+                ExpiresIn=600
+            )
+            hatchery_image = HatcheryImage(url=presigned_url)
+            hatchery_image.save()
+
+            return Response({"imageId": hatchery_image.id, "url": presigned_url}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            raise APIException({"message": "이미지 URL 발급에 실패했습니다."})

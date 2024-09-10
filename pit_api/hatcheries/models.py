@@ -4,6 +4,14 @@ from django.utils import timezone
 from pit_api.users.models import User
 
 
+class HatcheryImage(models.Model):
+    class Meta:
+        db_table = "hatchery_image"
+
+    url = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Hatchery(models.Model):
     def __str__(self):
         return self.name
@@ -15,7 +23,7 @@ class Hatchery(models.Model):
     description = models.CharField(max_length=200, null=True, blank=True)
     address = models.CharField(max_length=50, null=True, blank=True)
     address_detail = models.CharField(max_length=50, null=True, blank=True)
-    image = models.URLField(null=True, blank=True)
+    image = models.ForeignKey(HatcheryImage, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     removed_at = models.DateTimeField(null=True, blank=True)
 
