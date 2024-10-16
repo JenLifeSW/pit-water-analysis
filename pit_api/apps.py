@@ -1,3 +1,4 @@
+import environ
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 
@@ -7,6 +8,7 @@ def create_initial_datas(sender, **kwargs):
     from pit_api.fish_species.models import FishSpecies
     from pit_api.measurements.models import MeasurementTarget
     from pit_api.grades.models import Grade
+    from pit_api.hatcheries.models import HatcheryImage
 
     if not Role.objects.exists():
         Role.objects.create(name="user", description="사용자", id=0)
@@ -22,11 +24,23 @@ def create_initial_datas(sender, **kwargs):
     if not MeasurementTarget.objects.exists():
         MeasurementTarget.objects.create(name="질산성 질소", display_unit="ppm")
         MeasurementTarget.objects.create(name="온도", display_unit="˚C")
+        MeasurementTarget.objects.create(name="용존산소량", display_unit="ppm")
+        MeasurementTarget.objects.create(name="ph", display_unit="ph")
+        MeasurementTarget.objects.create(name="산소포화도", display_unit="%")
+        MeasurementTarget.objects.create(name="염분", display_unit="‰")
+        MeasurementTarget.objects.create(name="산화환원전위", display_unit="mV")
 
     if not Grade.objects.exists():
         Grade.objects.create(name="안전", text_color="#00D2D2", background_color="#D7F6F6")
         Grade.objects.create(name="경고", text_color="#FF6D00", background_color="#FFE5D2")
         Grade.objects.create(name="위험", text_color="#FA5A5A", background_color="#FFEAEA")
+
+    if not HatcheryImage.objects.exists():
+        env = environ.Env()
+
+        image_base = env("HATCHERY_IMAGE_URL")
+        for i in range(1, 17):
+            HatcheryImage.objects.create(url=f"{image_base}{i:02d}.png")
 
 
 class PitApiConfig(AppConfig):

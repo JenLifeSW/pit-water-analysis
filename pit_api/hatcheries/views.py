@@ -2,7 +2,6 @@ import random
 import uuid
 
 import boto3
-import environ
 from django.conf import settings
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
@@ -35,12 +34,8 @@ class HatcheryAPIView(AdminAPIView):
         if existing_hatchery:
             raise Conflict409Exception({"message": "이미 사용중인 양식장 이름입니다."})
 
-        env = environ.Env()
-
-        image_base = env("HATCHERY_IMAGE_URL")
-        num = random.randint(1, 16)
-        image_url = f"{image_base}{num:02d}.png"
-        request.data["image"] = image_url
+        random_id = random.randint(1, 16)
+        request.data["image"] = random_id
 
         serializer = HatcherySerializer(data=request.data)
         if not serializer.is_valid():
