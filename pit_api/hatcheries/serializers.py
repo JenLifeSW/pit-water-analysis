@@ -35,6 +35,12 @@ class HatcherySerializer(BaseSerializer):
         help_text=regex_str_hatchery_description
     )
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # If image exists, add its URL, otherwise set it to None
+        representation['image'] = instance.image.url if instance.image else None
+        return representation
+
 
 class HatcheryDetailSerializer(BaseSerializer):
     class Meta:
