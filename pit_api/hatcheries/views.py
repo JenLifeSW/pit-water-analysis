@@ -34,10 +34,11 @@ class HatcheryAPIView(AdminAPIView):
         if existing_hatchery:
             raise Conflict409Exception({"message": "이미 사용중인 양식장 이름입니다."})
 
+        data = request.data.copy()
         random_id = random.randint(1, 16)
-        request.data["image"] = random_id
+        data["image"] = random_id
 
-        serializer = HatcherySerializer(data=request.data)
+        serializer = HatcherySerializer(data=data)
         if not serializer.is_valid():
             return serializer.get_error_response()
         hatchery = serializer.save()
